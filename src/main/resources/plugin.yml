@@ -1,0 +1,6 @@
+name: ForceChat
+main: io.github.com.geertbraakman.ForceChat
+version: '2.0.1'
+description: 'An easy to use forcechat plugin, use the command /forcechat.'
+softdepend:
+  - PlaceholderAPI

@@ -1,0 +1,23 @@
+command:
+
+# The permission for the command, set to 'none' for no permission.
+  permission: 'forcechat.use'
+
+# The aliases for the command (the main command is always 'forcechat')
+  aliases:
+    - 'fc'
+
+# Here you can set the messages for the plugin, use 'default' for the default message.
+#
+# Placeholders:
+#  - %player% = the player that gets forced to chat.
+#  - %message% = the message the player is forced to chat.
+#  - All placeholders supported by PlaceholderAPI (https://www.spigotmc.org/resources/placeholderapi.6245/)
+  messages:
+    noPerm: default
+    success: default
+    notOnline: default
+    invalidArguments: default
+
+
+
