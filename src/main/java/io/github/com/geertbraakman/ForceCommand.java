@@ -1,40 +1,45 @@
 package io.github.com.geertbraakman;
 
-import io.github.com.geertbraakman.api.command.APICommand;
-import me.clip.placeholderapi.PlaceholderAPI;
+
+import io.github.geertbraakman.api.APIPlugin;
+import io.github.geertbraakman.api.command.APICommand;
+import io.github.geertbraakman.api.util.Util;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+
+import java.util.HashMap;
 
 public class ForceCommand extends APICommand {
 
-    private boolean usePlaceholders;
-    private String successMessage;
-    private String notOnlineMessage;
-    private String invalidArgumentsMessage;
-
-    public ForceCommand(Plugin plugin, String command, boolean usePlaceholders) {
+    public ForceCommand(APIPlugin plugin, String command) {
         super(plugin, command);
-        this.usePlaceholders = usePlaceholders;
-        successMessage = "&8[&2&lForceChat&8] &aForced &e%player% &ato chat: &7%message%&a!";
-        notOnlineMessage = "&8[&2&lForceChat&8] &cThe player &7%player% &cis not online!";
-        invalidArgumentsMessage = "&8[&2&lForceChat&8] &cInvalid arguments! Use /forcechat <player> <message>";
+        getMessageHandler().setDefaultMessage("success", "&aForced &e%player% &ato chat: &7%message%&a!");
+        getMessageHandler().setDefaultMessage("notOnline","&cThe player &7%player% &cis not online!");
+        getMessageHandler().setDefaultMessage("invalidArguments", "&cInvalid arguments! Use /forcechat <player> <message>");
+        getMessageHandler().setDefaultMessage("prefix", "&8[&2&lForceChat&8]");
     }
 
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+        Player player = null;
+        if(sender instanceof Player) {
+            player = (Player) sender;
+        }
+
+        HashMap<String, String> map = new HashMap<>();
+
         if(args.length < 2){
-            sendMessage(sender, invalidArgumentsMessage, "", "");
+            sender.sendMessage(getMessageHandler().getMessage("invalidArguments", player));
             return true;
         }
 
-        String playername = args[0];
+        String playerName = args[0];
+        map.put("%player%", playerName);
         args = removeFirstArgument(args);
-        Player player = Bukkit.getPlayer(playername);
-        if(player == null) {
-            sendMessage(sender, notOnlineMessage, playername, "");
+        Player target = Bukkit.getPlayer(playerName);
+        if(target == null) {
+            sender.sendMessage(getMessageHandler().getMessage("invalidArguments", player, map));
             return true;
         }
 
@@ -45,37 +50,11 @@ public class ForceCommand extends APICommand {
                 message.append(" ");
             }
         }
+        map.put("%message%", message.toString());
 
-        player.chat(setPlaceholders(message.toString(), playername));
+        target.chat(Util.updatePlaceholders(map.get("%message%"), target, null));
 
-        sendMessage(sender, successMessage, playername, message.toString());
+        sender.sendMessage(getMessageHandler().getMessage("success", player, map));
         return true;
     }
-
-    public void setSuccessMessage(String successMessage){
-        this.successMessage = successMessage;
-    }
-
-    public void setNotOnlineMessage(String notOnlineMessage) {
-        this.notOnlineMessage = notOnlineMessage;
-    }
-
-    public void setInvalidArgumentsMessage(String invalidArgumentsMessage) {
-        this.invalidArgumentsMessage = invalidArgumentsMessage;
-    }
-
-    private void sendMessage(CommandSender sender, String message, String playername, String msg){
-        message = message.replace("%player%", playername).replace("%message%", msg);
-        message = setPlaceholders(message, playername);
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-    }
-
-    private String setPlaceholders(String message, String playername) {
-        if(usePlaceholders){
-            Player player = Bukkit.getPlayer(playername);
-            message = PlaceholderAPI.setPlaceholders(player, message);
-        }
-        return message;
-    }
-
 }

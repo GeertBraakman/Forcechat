@@ -1,0 +1,7 @@
+messages:
+  success: default
+  noPerm: default
+  notOnline: default
+  invalidArguments: default
+  prefix: default
+

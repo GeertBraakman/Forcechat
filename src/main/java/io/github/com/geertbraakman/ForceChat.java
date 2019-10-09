@@ -1,37 +1,37 @@
 package io.github.com.geertbraakman;
 
-import io.github.com.geertbraakman.api.command.APICommand;
-import io.github.com.geertbraakman.api.command.CommandHandler;
-import io.github.com.geertbraakman.api.config.APIConfig;
-import io.github.com.geertbraakman.api.config.ConfigHandler;
 
+
+import io.github.geertbraakman.api.APIPlugin;
+import io.github.geertbraakman.api.command.APICommand;
+import io.github.geertbraakman.api.config.APIConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.java.JavaPlugin;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class ForceChat extends JavaPlugin {
+public class ForceChat extends APIPlugin {
 
     private APIConfig config;
     private ForceCommand command;
-    private ConfigHandler configHandler;
+
 
     @Override
     public void onEnable(){
-        configHandler = ConfigHandler.getInstance(this);
+
         config = new APIConfig(this, "config");
-        configHandler.registerConfig(config);
-        command = new ForceCommand(this, "forcechat", (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null));
+        getConfigHandler().registerConfig(config);
+        command = new ForceCommand(this, "forcechat");
         reloadCommand(command);
         APICommand cmd = getReloadCommand();
         cmd.setPermission("forcechat.reload");
         command.addSubCommand(cmd);
-        new CommandHandler(this).registerCommand(this, command);
+        getCommandHandler().registerCommand(this, command);
     }
 
     private void reloadCommand(ForceCommand command){
@@ -58,9 +58,6 @@ public class ForceChat extends JavaPlugin {
             }
 
             noPermMessage = config.getFileConfiguration().getString("command.messages.noPerm");
-            successMessage = config.getFileConfiguration().getString("command.messages.success");
-            notOnlineMessage = config.getFileConfiguration().getString("command.messages.notOnline");
-            invalidArgumentsMessage = config.getFileConfiguration().getString("command.messages.invalidArguments");
         }
 
         command.setAliases(commands);
@@ -71,15 +68,6 @@ public class ForceChat extends JavaPlugin {
         if(noPermMessage != null && !noPermMessage.equals("default")){
             command.setPermissionMessage(noPermMessage);
         }
-        if(successMessage != null && !successMessage.equals("default")){
-            command.setSuccessMessage(successMessage);
-        }
-        if(notOnlineMessage != null && !notOnlineMessage.equals("default")){
-            command.setNotOnlineMessage(notOnlineMessage);
-        }
-        if(invalidArgumentsMessage != null && !invalidArgumentsMessage.equals("default")){
-            command.setInvalidArgumentsMessage(invalidArgumentsMessage);
-        }
         command.setDescription("This command will force someone to chat what you want!");
         command.setUsage("forcechat <player> <message>");
     }
@@ -88,7 +76,7 @@ public class ForceChat extends JavaPlugin {
         return new APICommand(this, "reload"){
 
             public boolean onCommand(CommandSender commandSender, Command command2, String s, String[] strings) {
-                if(!configHandler.reload()){
+                if(!getConfigHandler().reload()){
                     commandSender.sendMessage(ChatColor.RED + "There went something wrong while reloading the config!");
                     return true;
                 }
